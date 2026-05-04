@@ -1,0 +1,116 @@
+{
+  "conservative": {
+    "name": "Conservative (B)",
+    "description": "Осторожный старт: 2 клиники, 6 пациентов, медленный рост. Модель B.",
+    "model": "model_b",
+    "parameters": {
+      "revenue": {
+        "num_clinics": 2,
+        "patients_per_clinic_month1": 6,
+        "growth_rate": 0.30,
+        "rental_price": 6000,
+        "rehab_duration_months": 2,
+        "avg_rental_duration": 2,
+        "clinic_commission_rate": 0.20
+      },
+      "fixed_costs": {
+        "team_salaries": 180000,
+        "infrastructure_fixed": 15000,
+        "office_rent": 20000,
+        "legal_services": 5000,
+        "other_fixed": 5000
+      },
+      "variable_costs": {
+        "cogs_per_device": 12000,
+        "logistics_per_patient": 500,
+        "support_per_patient_per_month": 200,
+        "cac_clinic": 10000,
+        "cac_patient": 500,
+        "infrastructure_per_user": 50
+      },
+      "assumptions": {
+        "amortization_months": 24,
+        "utilization_rate": 0.60,
+        "churn_rate": 0.20,
+        "desired_margin": 0.20
+      }
+    }
+  },
+  "base": {
+    "name": "Base (B)",
+    "description": "Базовый сценарий: 3 клиники, 10 пациентов, рост 60%/мес. Модель B.",
+    "model": "model_b",
+    "parameters": {
+      "revenue": {
+        "num_clinics": 3,
+        "patients_per_clinic_month1": 10,
+        "growth_rate": 0.60,
+        "rental_price": 7000,
+        "rehab_duration_months": 3,
+        "avg_rental_duration": 3,
+        "clinic_commission_rate": 0.15
+      },
+      "fixed_costs": {
+        "team_salaries": 180000,
+        "infrastructure_fixed": 15000,
+        "office_rent": 20000,
+        "legal_services": 5000,
+        "other_fixed": 5000
+      },
+      "variable_costs": {
+        "cogs_per_device": 12000,
+        "logistics_per_patient": 500,
+        "support_per_patient_per_month": 200,
+        "cac_clinic": 9000,
+        "cac_patient": 400,
+        "infrastructure_per_user": 50
+      },
+      "assumptions": {
+        "amortization_months": 24,
+        "utilization_rate": 0.70,
+        "churn_rate": 0.10,
+        "desired_margin": 0.25
+      }
+    }
+  },
+  "optimistic": {
+    "name": "Optimistic (A+B)",
+    "description": "Оптимистичный: клиника покупает парк + растущая аренда пациентам. Гибрид A+B.",
+    "model": "model_ab",
+    "parameters": {
+      "revenue": {
+        "num_clinics": 3,
+        "devices_per_clinic": 20,
+        "setup_fee": 60000,
+        "subscription_per_device": 5000,
+        "patients_per_clinic_month1": 12,
+        "growth_rate": 0.70,
+        "rental_price": 8000,
+        "rehab_duration_months": 4,
+        "avg_rental_duration": 4,
+        "clinic_commission_rate": 0.10
+      },
+      "fixed_costs": {
+        "team_salaries": 220000,
+        "infrastructure_fixed": 20000,
+        "office_rent": 25000,
+        "legal_services": 8000,
+        "other_fixed": 7000
+      },
+      "variable_costs": {
+        "cogs_per_device": 12000,
+        "logistics_per_patient": 500,
+        "support_per_patient_per_month": 150,
+        "cac_clinic": 7000,
+        "cac_patient": 300,
+        "infrastructure_per_user": 30
+      },
+      "assumptions": {
+        "amortization_months": 24,
+        "utilization_rate": 0.80,
+        "churn_rate": 0.05,
+        "desired_margin": 0.30
+      }
+    }
+  }
+}

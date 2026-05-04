@@ -1,0 +1,115 @@
+{
+  "model_a": {
+    "name": "Model A (B2B)",
+    "description": "Клиника покупает парк устройств + подписка на ПО",
+    "parameters": {
+      "revenue": {
+        "num_clinics": 3,
+        "devices_per_clinic": 15,
+        "setup_fee": 55000,
+        "subscription_per_device": 5500,
+        "patients_per_clinic_month1": 10,
+        "growth_rate": 0.5,
+        "rehab_duration_months": 3,
+        "avg_rental_duration": 3,
+        "clinic_schedule": []
+      },
+      "fixed_costs": {
+        "team_salaries": 180000,
+        "infrastructure_fixed": 15000,
+        "office_rent": 20000,
+        "legal_services": 5000,
+        "other_fixed": 5000
+      },
+      "variable_costs": {
+        "cogs_per_device": 12000,
+        "logistics_per_patient": 0,
+        "support_per_patient_per_month": 50,
+        "cac_clinic": 0,
+        "cac_patient": 0,
+        "infrastructure_per_user": 30
+      },
+      "assumptions": {
+        "amortization_months": 24,
+        "utilization_rate": 0.70,
+        "churn_rate": 0.10,
+        "desired_margin": 0.25
+      }
+    }
+  },
+  "model_b": {
+    "name": "Model B (B2B2C)",
+    "description": "Пациент арендует напрямую, клиника получает % комиссии",
+    "parameters": {
+      "revenue": {
+        "num_clinics": 3,
+        "patients_per_clinic_month1": 10,
+        "growth_rate": 0.60,
+        "rental_price": 7000,
+        "rehab_duration_months": 3,
+        "avg_rental_duration": 3,
+        "clinic_commission_rate": 0.15
+      },
+      "fixed_costs": {
+        "team_salaries": 180000,
+        "infrastructure_fixed": 15000,
+        "office_rent": 20000,
+        "legal_services": 5000,
+        "other_fixed": 5000
+      },
+      "variable_costs": {
+        "cogs_per_device": 12000,
+        "logistics_per_patient": 500,
+        "support_per_patient_per_month": 200,
+        "cac_clinic": 8000,
+        "cac_patient": 400,
+        "infrastructure_per_user": 50
+      },
+      "assumptions": {
+        "amortization_months": 24,
+        "utilization_rate": 0.70,
+        "churn_rate": 0.10,
+        "desired_margin": 0.25
+      }
+    }
+  },
+  "model_ab": {
+    "name": "Model A+B (Гибрид)",
+    "description": "Клиника покупает парк → сдает в аренду пациентам",
+    "parameters": {
+      "revenue": {
+        "num_clinics": 2,
+        "devices_per_clinic": 15,
+        "setup_fee": 55000,
+        "subscription_per_device": 4000,
+        "patients_per_clinic_month1": 8,
+        "growth_rate": 0.50,
+        "rental_price": 7000,
+        "rehab_duration_months": 3,
+        "avg_rental_duration": 3,
+        "clinic_commission_rate": 0.15
+      },
+      "fixed_costs": {
+        "team_salaries": 180000,
+        "infrastructure_fixed": 15000,
+        "office_rent": 20000,
+        "legal_services": 5000,
+        "other_fixed": 5000
+      },
+      "variable_costs": {
+        "cogs_per_device": 12000,
+        "logistics_per_patient": 500,
+        "support_per_patient_per_month": 200,
+        "cac_clinic": 0,
+        "cac_patient": 0,
+        "infrastructure_per_user": 30
+      },
+      "assumptions": {
+        "amortization_months": 24,
+        "utilization_rate": 0.70,
+        "churn_rate": 0.10,
+        "desired_margin": 0.25
+      }
+    }
+  }
+}
