@@ -308,7 +308,7 @@ def _build_assumption_what_if(
 
 # Инициализация session state (должна быть ДО использования)
 if 'num_months' not in st.session_state:
-    st.session_state.num_months = 3
+    st.session_state.num_months = 12
 
 if 'saved_params' not in st.session_state:
     st.session_state.saved_params = {
@@ -341,24 +341,49 @@ if 'custom_revenue' not in st.session_state:
 
 # clinic_schedule: список пачек клиник [{month_start, count}] для Model A
 if 'clinic_schedule_model_a' not in st.session_state:
-    st.session_state.clinic_schedule_model_a = []
+    st.session_state.clinic_schedule_model_a = [
+        {"month_start": 3, "count": 1},
+        {"month_start": 4, "count": 2},
+        {"month_start": 5, "count": 2},
+        {"month_start": 6, "count": 2},
+        {"month_start": 7, "count": 2},
+        {"month_start": 8, "count": 3},
+        {"month_start": 9, "count": 4},
+        {"month_start": 10, "count": 3},
+        {"month_start": 11, "count": 3},
+        {"month_start": 12, "count": 3},
+    ]
+
+# Дефолтная матрица пациентов для model_a (ручной ввод, 36×36)
+_DEFAULT_MATRIX_MODEL_A = [[0] * MAX_MONTHS for _ in range(MAX_MONTHS)]
+_DEFAULT_MATRIX_MODEL_A[0][0] = 10; _DEFAULT_MATRIX_MODEL_A[0][1] = 10; _DEFAULT_MATRIX_MODEL_A[0][2] = 10
+_DEFAULT_MATRIX_MODEL_A[3][3] = 10; _DEFAULT_MATRIX_MODEL_A[3][4] = 10; _DEFAULT_MATRIX_MODEL_A[3][5] = 10
+_DEFAULT_MATRIX_MODEL_A[4][4] = 2;  _DEFAULT_MATRIX_MODEL_A[4][5] = 2;  _DEFAULT_MATRIX_MODEL_A[4][6] = 2
+_DEFAULT_MATRIX_MODEL_A[5][5] = 5;  _DEFAULT_MATRIX_MODEL_A[5][6] = 5;  _DEFAULT_MATRIX_MODEL_A[5][7] = 5
+_DEFAULT_MATRIX_MODEL_A[6][6] = 8;  _DEFAULT_MATRIX_MODEL_A[6][7] = 8;  _DEFAULT_MATRIX_MODEL_A[6][8] = 8
+_DEFAULT_MATRIX_MODEL_A[7][7] = 10; _DEFAULT_MATRIX_MODEL_A[7][8] = 10; _DEFAULT_MATRIX_MODEL_A[7][9] = 10
+_DEFAULT_MATRIX_MODEL_A[8][8] = 15; _DEFAULT_MATRIX_MODEL_A[8][9] = 15; _DEFAULT_MATRIX_MODEL_A[8][10] = 15
+_DEFAULT_MATRIX_MODEL_A[9][9] = 17; _DEFAULT_MATRIX_MODEL_A[9][10] = 17; _DEFAULT_MATRIX_MODEL_A[9][11] = 17
+_DEFAULT_MATRIX_MODEL_A[10][10] = 20; _DEFAULT_MATRIX_MODEL_A[10][11] = 20
+_DEFAULT_MATRIX_MODEL_A[11][11] = 25
 
 # patient_mode: "auto" | "manual" — режим потока пациентов (отдельно для каждой модели)
+_DEFAULT_PATIENT_MODES = {'model_a': 'manual', 'model_b': 'auto', 'model_ab': 'auto'}
+_DEFAULT_PATIENT_MATRICES = {
+    'model_a': _DEFAULT_MATRIX_MODEL_A,
+    'model_b': [[0] * MAX_MONTHS for _ in range(MAX_MONTHS)],
+    'model_ab': [[0] * MAX_MONTHS for _ in range(MAX_MONTHS)],
+}
 for _m in ('model_a', 'model_b', 'model_ab'):
     if f'patient_mode_{_m}' not in st.session_state:
-        st.session_state[f'patient_mode_{_m}'] = 'auto'
+        st.session_state[f'patient_mode_{_m}'] = _DEFAULT_PATIENT_MODES[_m]
     # manual_patients: список новых пациентов на клинику по месяцам (0-based) [legacy compat]
     if f'manual_patients_{_m}' not in st.session_state:
         st.session_state[f'manual_patients_{_m}'] = [0] * MAX_MONTHS
     # manual_patients_matrix: 2D матрица [когорта][месяц], MAX_MONTHS x MAX_MONTHS
     # matrix[i][j] = активных пациентов из когорты i в месяце j (0-based)
     if f'manual_patients_matrix_{_m}' not in st.session_state:
-        _old_1d = st.session_state[f'manual_patients_{_m}']
-        _mx = [[0] * MAX_MONTHS for _ in range(MAX_MONTHS)]
-        for _ci in range(MAX_MONTHS):
-            if _ci < len(_old_1d) and _old_1d[_ci] > 0:
-                _mx[_ci][_ci] = int(_old_1d[_ci])
-        st.session_state[f'manual_patients_matrix_{_m}'] = _mx
+        st.session_state[f'manual_patients_matrix_{_m}'] = _DEFAULT_PATIENT_MATRICES[_m]
 
 # Флаг открытия модального окна таблицы пациентов
 if 'show_patient_table' not in st.session_state:
@@ -368,13 +393,33 @@ if 'show_patient_table' not in st.session_state:
 if 'rnd_enabled' not in st.session_state:
     st.session_state.rnd_enabled = False
 if 'rnd_months' not in st.session_state:
-    st.session_state.rnd_months = 3
+    st.session_state.rnd_months = 2
 if 'rnd_cost_categories' not in st.session_state:
     st.session_state.rnd_cost_categories = list(DEFAULT_RND_CATEGORIES)
 if 'rnd_costs_matrix' not in st.session_state:
-    st.session_state.rnd_costs_matrix = {}
+    st.session_state.rnd_costs_matrix = {
+        "Зарплаты команды": [200000.0, 200000.0],
+        "Оборудование и материалы": [150000.0, 20000.0],
+        "Разработка и тестирование": [100000.0, 0.0],
+        "Аренда и инфраструктура": [0.0, 0.0],
+        "Прочие расходы R&D": [0.0, 0.0],
+    }
 if 'show_rnd_table' not in st.session_state:
     st.session_state.show_rnd_table = False
+
+# ── Predictor defaults (срок окупаемости) ─────────────────────
+_PREDICTOR_DEFAULTS = {
+    'model_a': {'initial_investment': 1_000_000, 'target_breakeven': 12, 'target_margin_rate': 0.0},
+    'model_b': {'initial_investment': 0, 'target_breakeven': 3, 'target_margin_rate': 0.25},
+    'model_ab': {'initial_investment': 0, 'target_breakeven': 3, 'target_margin_rate': 0.25},
+}
+for _pm in ('model_a', 'model_b', 'model_ab'):
+    if f'{_pm}_initial_investment_value' not in st.session_state:
+        st.session_state[f'{_pm}_initial_investment_value'] = _PREDICTOR_DEFAULTS[_pm]['initial_investment']
+    if f'{_pm}_target_breakeven_value' not in st.session_state:
+        st.session_state[f'{_pm}_target_breakeven_value'] = _PREDICTOR_DEFAULTS[_pm]['target_breakeven']
+    if f'{_pm}_target_margin_rate_value' not in st.session_state:
+        st.session_state[f'{_pm}_target_margin_rate_value'] = _PREDICTOR_DEFAULTS[_pm]['target_margin_rate']
 
 # Применяем отложенный импорт слепка (до рендера любых виджетов).
 # Кнопки "Применить" кладут payload в _pending_snapshot_payload + rerun();
