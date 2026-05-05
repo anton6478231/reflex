@@ -541,6 +541,65 @@ def preflight_config_snapshot(
     }
 
 
+_REVENUE_SLIDER_KEYS: Dict[str, List[str]] = {
+    "model_a": [
+        "model_a_num_clinics",
+        "model_a_devices_per_clinic",
+        "model_a_setup_fee",
+        "model_a_subscription_per_device",
+        "model_a_patients_per_clinic_month1",
+        "model_a_growth_rate",
+        "model_a_rehab_duration_months",
+    ],
+    "model_b": [
+        "model_b_num_clinics",
+        "model_b_patients_per_clinic_month1",
+        "model_b_growth_rate",
+        "model_b_rental_price",
+        "model_b_rehab_duration_months",
+        "model_b_clinic_commission_rate",
+    ],
+    "model_ab": [
+        "model_ab_num_clinics",
+        "model_ab_devices_per_clinic",
+        "model_ab_setup_fee",
+        "model_ab_subscription_per_device",
+        "model_ab_patients_per_clinic_month1",
+        "model_ab_growth_rate",
+        "model_ab_rental_price",
+        "model_ab_rehab_duration_months",
+        "model_ab_clinic_commission_rate",
+    ],
+}
+_FIXED_COST_NAMES = [
+    "team_salaries", "infrastructure_fixed", "office_rent",
+    "legal_services", "other_fixed",
+]
+_VAR_COST_NAMES = [
+    "cogs_per_device", "logistics_per_patient", "support_per_patient_per_month",
+    "cac_clinic", "cac_patient", "infrastructure_per_user",
+]
+_ASSUMPTION_SLIDER_KEYS = [
+    "assumptions_amortization_months",
+    "assumptions_utilization_rate",
+    "assumptions_churn_rate",
+    "assumptions_desired_margin",
+]
+_WIDGET_SUFFIXES = ("_value", "_slider_widget", "_manual_widget", "_mode", "_last_mode",
+                    "_pct_value", "_pct_slider_widget", "_pct_manual_widget",
+                    "_pct_mode", "_pct_last_mode")
+
+
+def _clear_widget_keys(session_state: Any, key: str) -> None:
+    """Delete all session_state entries related to a slider/input widget key."""
+    for sfx in _WIDGET_SUFFIXES:
+        k = f"{key}{sfx}"
+        if k in session_state:
+            del session_state[k]
+    if key in session_state:
+        del session_state[key]
+
+
 def apply_config_snapshot(
     session_state: Any,
     normalized_payload: Dict[str, Any],
@@ -607,3 +666,15 @@ def apply_config_snapshot(
             del session_state[_k]
     if "rnd_months_slider" in session_state:
         del session_state["rnd_months_slider"]
+
+    # Clear all revenue/costs/assumptions widget state keys so they reinitialize
+    # from the new saved_params on the next render (otherwise sliders show stale values).
+    for model in SUPPORTED_MODELS:
+        for base_key in _REVENUE_SLIDER_KEYS.get(model, []):
+            _clear_widget_keys(session_state, base_key)
+        for name in _FIXED_COST_NAMES:
+            _clear_widget_keys(session_state, f"{model}_fixed_{name}")
+        for name in _VAR_COST_NAMES:
+            _clear_widget_keys(session_state, f"{model}_var_{name}")
+    for base_key in _ASSUMPTION_SLIDER_KEYS:
+        _clear_widget_keys(session_state, base_key)

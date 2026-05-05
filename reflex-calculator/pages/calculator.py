@@ -1308,6 +1308,7 @@ if model_type == "model_a":
         max_value=500000,
         value=current_params['revenue'].get('setup_fee', 50000),
         step=5000,
+        key="model_a_setup_fee",
         help=(
             "Разовая выручка ReFlex с каждого проданного устройства. "
             "Начисляется при появлении новой клиники (весь контрактный парк) "
@@ -1597,6 +1598,7 @@ elif model_type == "model_ab":
         "Setup Fee (₽)", 0, 200000,
         current_params['revenue'].get('setup_fee', 50000),
         step=5000,
+        key="model_ab_setup_fee",
         help="Разовая цена продажи устройства клинике"
     )
     revenue_params['subscription_per_device'] = slider_with_manual_int(
@@ -1896,30 +1898,35 @@ fixed_costs_params = {
         "Зарплаты команды (₽/мес)", 0, 2000000,
         current_params['fixed_costs'].get('team_salaries', 500000),
         step=50000,
+        key=f"{model_type}_fixed_team_salaries",
         help="Общий фонд оплаты труда команды в месяц (постоянные затраты)"
     ),
     'infrastructure_fixed': st.sidebar.number_input(
         "Инфраструктура (₽/мес)", 0, 100000,
         current_params['fixed_costs'].get('infrastructure_fixed', 20000),
         step=5000,
+        key=f"{model_type}_fixed_infrastructure_fixed",
         help="Постоянные расходы на серверы, облако, лицензии (не зависят от количества пользователей)"
     ),
     'office_rent': st.sidebar.number_input(
         "Офис/коворкинг (₽/мес)", 0, 200000,
         current_params['fixed_costs'].get('office_rent', 30000),
         step=5000,
+        key=f"{model_type}_fixed_office_rent",
         help="Аренда офиса или коворкинга в месяц"
     ),
     'legal_services': st.sidebar.number_input(
         "Юридические услуги (₽/мес)", 0, 100000,
         current_params['fixed_costs'].get('legal_services', 10000),
         step=5000,
+        key=f"{model_type}_fixed_legal_services",
         help="Юридическое сопровождение, договоры, консультации (ежемесячные расходы)"
     ),
     'other_fixed': st.sidebar.number_input(
         "Прочее (₽/мес)", 0, 50000,
         current_params['fixed_costs'].get('other_fixed', 10000),
         step=5000,
+        key=f"{model_type}_fixed_other_fixed",
         help="Бухгалтерия, подписки на ПО, прочие постоянные расходы"
     )
 }
@@ -1982,36 +1989,42 @@ variable_costs_params = {
         "COGS (себестоимость устройства, ₽)", 0, 100000,
         current_params['variable_costs'].get('cogs_per_device', 15000),
         step=1000,
+        key=f"{model_type}_var_cogs_per_device",
         help="Себестоимость производства одного устройства (плата только при изготовлении новых устройств)"
     ),
     'logistics_per_patient': st.sidebar.number_input(
         "Логистика/пациента (₽)", 0, 5000,
         current_params['variable_costs'].get('logistics_per_patient', 500),
         step=100,
+        key=f"{model_type}_var_logistics_per_patient",
         help="Доставка устройства пациенту туда-обратно (единоразово на пациента)"
     ),
     'support_per_patient_per_month': st.sidebar.number_input(
         "Поддержка/пациента/мес (₽)", 0, 2000,
         current_params['variable_costs'].get('support_per_patient_per_month', 200),
         step=50,
+        key=f"{model_type}_var_support_per_patient_per_month",
         help="Техническая поддержка одного пациента в месяц (растет с количеством пациентов)"
     ),
     'cac_clinic': st.sidebar.number_input(
         "CAC (привлечение клиники, ₽)", 0, 100000,
         current_params['variable_costs'].get('cac_clinic', 10000),
         step=1000,
+        key=f"{model_type}_var_cac_clinic",
         help="Customer Acquisition Cost - затраты на привлечение одной клиники (маркетинг, продажи)"
     ),
     'cac_patient': st.sidebar.number_input(
         "CAC (привлечение пациента, ₽)", 0, 5000,
         current_params['variable_costs'].get('cac_patient', 0),
         step=100,
+        key=f"{model_type}_var_cac_patient",
         help="Затраты на привлечение одного пациента напрямую (если есть прямой канал)"
     ),
     'infrastructure_per_user': st.sidebar.number_input(
         "Инфраструктура/пользователя (₽/мес)", 0, 500,
         current_params['variable_costs'].get('infrastructure_per_user', 50),
         step=10,
+        key=f"{model_type}_var_infrastructure_per_user",
         help="Переменные расходы на инфраструктуру на одного активного пользователя (облако, трафик)"
     )
 }
@@ -2132,8 +2145,11 @@ all_params = {
 }
 
 # Автосохранение базовых настроек текущей модели
+_revenue_to_save = revenue_params.copy()
+if model_type == 'model_a':
+    _revenue_to_save['clinic_schedule'] = list(st.session_state.get('clinic_schedule_model_a', []))
 st.session_state.saved_params[model_type] = {
-    'revenue': revenue_params.copy(),
+    'revenue': _revenue_to_save,
     'fixed_costs': fixed_costs_params.copy(),
     'variable_costs': variable_costs_params.copy(),
     'assumptions': assumptions_params.copy(),
@@ -2157,6 +2173,7 @@ with config_actions_placeholder:
 
         snapshot_state = {
             'num_months': st.session_state.num_months,
+            'discount_rate_annual': float(st.session_state.get('discount_rate_annual', 0.20)),
             'saved_params': snapshot_saved_params,
             'custom_fixed_costs': st.session_state.custom_fixed_costs,
             'custom_variable_costs': st.session_state.custom_variable_costs,
