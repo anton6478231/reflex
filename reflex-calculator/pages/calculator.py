@@ -342,16 +342,15 @@ if 'custom_revenue' not in st.session_state:
 # clinic_schedule: список пачек клиник [{month_start, count}] для Model A
 if 'clinic_schedule_model_a' not in st.session_state:
     st.session_state.clinic_schedule_model_a = [
-        {"month_start": 3, "count": 1},
-        {"month_start": 4, "count": 2},
+        {"month_start": 4, "count": 1},
         {"month_start": 5, "count": 2},
         {"month_start": 6, "count": 2},
-        {"month_start": 7, "count": 2},
+        {"month_start": 7, "count": 3},
         {"month_start": 8, "count": 3},
-        {"month_start": 9, "count": 4},
-        {"month_start": 10, "count": 3},
-        {"month_start": 11, "count": 3},
-        {"month_start": 12, "count": 3},
+        {"month_start": 9, "count": 3},
+        {"month_start": 10, "count": 4},
+        {"month_start": 11, "count": 4},
+        {"month_start": 12, "count": 4},
     ]
 
 # Дефолтная матрица пациентов для model_a (ручной ввод, 36×36)
